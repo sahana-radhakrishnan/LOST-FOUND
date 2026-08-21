@@ -1,0 +1,22 @@
+path: C:/Users/SNT/Documents/Lost and Found/LOST-FOUND/yolo/dataset
+
+train: train/images
+val: valid/images
+test: test/images
+
+names:
+  0: Bottle
+  1: Handbag
+  2: Headphones
+  3: ID
+  4: Keyboard
+  5: Keys
+  6: Laptop
+  7: Luggage-and-bags
+  8: Mouse
+  9: Phone
+  10: Shoes
+  11: Suitcase
+  12: Wallet
+  13: Wires
+  14: bag

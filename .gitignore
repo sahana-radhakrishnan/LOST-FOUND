@@ -1,0 +1,9 @@
+# YOLO dataset
+yolo/dataset/
+
+# YOLO trained models and runs
+yolo/models/
+yolo/results/
+
+# YOLO pretrained weights
+*.pt
