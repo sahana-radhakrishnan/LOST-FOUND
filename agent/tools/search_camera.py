@@ -1,56 +1,63 @@
 from datetime import datetime
-from typing import Optional
 
-from agent.config import BACKEND_API_URL
-import requests
+from agent.tools.search_found_items import search_found_items
 
 
 def search_camera(
-    camera_id: Optional[str] = None,
-    location: Optional[str] = None,
-    start_time: Optional[str] = None,
-    end_time: Optional[str] = None,
-):
+    camera_id: str | None = None,
+    location: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+) -> list[dict]:
     """
-    Search detections using camera, location, and time filters.
+    Search detections by camera, location and/or time range.
     """
 
-    response = requests.get(
-        f"{BACKEND_API_URL}/api/detections",
-        timeout=10,
-    )
-
-    response.raise_for_status()
-
-    detections = response.json()
-
-    if not isinstance(detections, list):
-        return []
+    detections = search_found_items()
 
     results = []
 
+    start = (
+        datetime.fromisoformat(start_time)
+        if start_time
+        else None
+    )
+
+    end = (
+        datetime.fromisoformat(end_time)
+        if end_time
+        else None
+    )
+
     for detection in detections:
 
-        if camera_id:
-            if detection.get("camera_id") != camera_id:
-                continue
+        if (
+            camera_id
+            and detection.get("camera_id") != camera_id
+        ):
+            continue
 
-        if location:
-            detection_location = str(
-                detection.get("location", "")
+        if (
+            location
+            and location.lower()
+            not in detection.get(
+                "location",
+                "",
             ).lower()
+        ):
+            continue
 
-            if location.lower() not in detection_location:
+        timestamp = detection.get("timestamp")
+
+        if timestamp:
+            detected_time = datetime.fromisoformat(
+                timestamp
+            )
+
+            if start and detected_time < start:
                 continue
 
-        detected_at = detection.get("detected_at")
-
-        if detected_at and start_time:
-            if detected_at < start_time:
-                continue
-
-        if detected_at and end_time:
-            if detected_at > end_time:
+            if end and detected_time > end:
                 continue
 
         results.append(detection)

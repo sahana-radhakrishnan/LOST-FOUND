@@ -3,8 +3,14 @@ import requests
 from agent.config import BACKEND_API_URL
 
 
-def search_items():
-    """Search open lost-item reports from the backend."""
+def search_items(
+    status: str = "LOST",
+) -> list[dict]:
+    """
+    Search lost-item reports through the backend API.
+
+    The agent never accesses the database directly.
+    """
 
     response = requests.get(
         f"{BACKEND_API_URL}/api/lost-items",
@@ -13,4 +19,13 @@ def search_items():
 
     response.raise_for_status()
 
-    return response.json()
+    items = response.json()
+
+    if status:
+        items = [
+            item
+            for item in items
+            if item.get("status") == status
+        ]
+
+    return items

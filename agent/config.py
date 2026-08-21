@@ -16,8 +16,13 @@ OLLAMA_BASE_URL = os.getenv(
 
 QWEN_MODEL = os.getenv(
     "QWEN_MODEL",
-    "qwen3",
+    "qwen3:latest",
 )
 
-MATCH_THRESHOLD = 0.85
-POSSIBLE_MATCH_THRESHOLD = 0.60
+MATCH_THRESHOLD = float(
+    os.getenv("MATCH_THRESHOLD", "0.60")
+)
+
+STRONG_MATCH_THRESHOLD = float(
+    os.getenv("STRONG_MATCH_THRESHOLD", "0.85")
+)

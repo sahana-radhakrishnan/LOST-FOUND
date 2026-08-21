@@ -3,14 +3,21 @@ import requests
 from agent.config import BACKEND_API_URL
 
 
-def send_sos(match_id, alert_type, message):
-    """Create an alert through the backend."""
+def send_sos(
+    match_id: int,
+    alert_type: str,
+    message: str,
+    status: str = "PENDING",
+) -> dict:
+    """
+    Create an investigation alert through the backend.
+    """
 
     payload = {
         "match_id": match_id,
         "alert_type": alert_type,
         "message": message,
-        "status": "PENDING",
+        "status": status,
     }
 
     response = requests.post(
