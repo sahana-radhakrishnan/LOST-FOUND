@@ -9,9 +9,13 @@ function DetectionFeed() {
     const loadDetections = async () => {
       try {
         const data = await getDetections();
-        setDetections(Array.isArray(data) ? data : []);
+
+        setDetections(
+          Array.isArray(data) ? data : [],
+        );
       } catch (error) {
-        console.error("Failed to load detections:", error);
+        console.log("Detection API unavailable:", error);
+        setDetections([]);
       } finally {
         setLoading(false);
       }
@@ -20,37 +24,104 @@ function DetectionFeed() {
     loadDetections();
   }, []);
 
-  if (loading) {
-    return <p>Loading detections...</p>;
-  }
-
   return (
-    <div>
-      <h1>Found Item / Detection Feed</h1>
+    <>
+      <div className="page-header page-header-row">
+        <div>
+          <h1>Detection Feed</h1>
+          <p>
+            Objects detected by the computer vision system.
+          </p>
+        </div>
 
-      {detections.length === 0 ? (
-        <p>No detections available.</p>
+        <div className="live-indicator">
+          <span className="live-dot" />
+          Detection Feed
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="card empty-state">
+          <div className="loading-spinner" />
+          <p>Loading detections...</p>
+        </div>
+      ) : detections.length === 0 ? (
+        <div className="card empty-state large-empty">
+          <div className="empty-icon">◉</div>
+
+          <h2>No detections yet</h2>
+
+          <p>
+            Detected objects from the YOLO system will appear
+            here when the detection API is available.
+          </p>
+        </div>
       ) : (
-        detections.map((detection) => (
-          <div key={detection.detection_id}>
-            <h3>{detection.object_name}</h3>
+        <div className="items-grid">
+          {detections.map((detection) => {
+            const confidence =
+              Number(detection.confidence || 0) * 100;
 
-            <p>
-              Confidence:{" "}
-              {detection.confidence !== undefined
-                ? `${(detection.confidence * 100).toFixed(1)}%`
-                : "N/A"}
-            </p>
+            return (
+              <div
+                className="item-card detection-card"
+                key={detection.detection_id}
+              >
+                <div className="detection-card-top">
+                  <div className="detection-object-icon">
+                    ◉
+                  </div>
 
-            <p>Location: {detection.location || "Unknown"}</p>
+                  <span className="badge badge-info">
+                    DETECTED
+                  </span>
+                </div>
 
-            <p>
-              Detected: {detection.detected_at || "Unknown"}
-            </p>
-          </div>
-        ))
+                <h3>
+                  {detection.object_name ||
+                    "Unknown Object"}
+                </h3>
+
+                <div className="item-meta">
+                  <div>
+                    <strong>Location:</strong>{" "}
+                    {detection.location || "Unknown"}
+                  </div>
+
+                  <div>
+                    <strong>Camera:</strong>{" "}
+                    {detection.camera_id || "Unknown"}
+                  </div>
+
+                  <div>
+                    <strong>Time:</strong>{" "}
+                    {detection.detected_at || "Unknown"}
+                  </div>
+                </div>
+
+                <div className="confidence-section">
+                  <div className="confidence-header">
+                    <span>Confidence</span>
+                    <strong>
+                      {confidence.toFixed(1)}%
+                    </strong>
+                  </div>
+
+                  <div className="score-bar">
+                    <div
+                      className="score-fill"
+                      style={{
+                        width: `${confidence}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
-    </div>
+    </>
   );
 }
 

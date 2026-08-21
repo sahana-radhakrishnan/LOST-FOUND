@@ -44,80 +44,137 @@ function ReportLostItem() {
         contact: "",
       });
     } catch (error) {
-      console.error(error);
-      setMessage("Failed to report lost item.");
+      console.error("Failed to report lost item:", error);
+      setMessage(
+        "Backend is currently unavailable. Your form is ready to submit once the API is running.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Report Lost Item</h1>
+    <>
+      <div className="page-header">
+        <h1>Report Lost Item</h1>
+        <p>
+          Provide detailed information to start an investigation.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Item Name</label>
-          <input
-            name="item_name"
-            value={form.item_name}
-            onChange={handleChange}
-            placeholder="Black Backpack"
-            required
-          />
+      <div className="card form-card">
+        <div className="section-heading">
+          <div className="section-icon">+</div>
+
+          <div>
+            <h2 className="card-title">Lost Item Information</h2>
+            <p className="card-subtitle">
+              The investigation agent will use these details to
+              search for possible matches.
+            </p>
+          </div>
         </div>
 
-        <div>
-          <label>Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Black backpack with laptop compartment"
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="item_name">Item Name</label>
+
+              <input
+                id="item_name"
+                name="item_name"
+                value={form.item_name}
+                onChange={handleChange}
+                placeholder="e.g. Black Backpack"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="contact">Contact</label>
+
+              <input
+                id="contact"
+                name="contact"
+                value={form.contact}
+                onChange={handleChange}
+                placeholder="+91XXXXXXXXXX"
+                required
+              />
+            </div>
+
+            <div className="form-group full">
+              <label htmlFor="description">Description</label>
+
+              <textarea
+                id="description"
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Describe color, size, brand, identifying marks, contents, etc."
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="location">Last Known Location</label>
+
+              <input
+                id="location"
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                placeholder="e.g. Near Library"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="lost_time">Lost Time</label>
+
+              <input
+                id="lost_time"
+                type="datetime-local"
+                name="lost_time"
+                value={form.lost_time}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Start Investigation"}
+            </button>
+          </div>
+
+          {message && (
+            <div className="message">
+              {message}
+            </div>
+          )}
+        </form>
+      </div>
+
+      <div className="info-banner">
+        <div className="info-banner-icon">i</div>
 
         <div>
-          <label>Location</label>
-          <input
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-            placeholder="Near Library"
-            required
-          />
+          <strong>What happens next?</strong>
+
+          <p>
+            The investigation agent will search reported lost
+            items and detected objects, compare their attributes,
+            and identify possible matches.
+          </p>
         </div>
-
-        <div>
-          <label>Lost Time</label>
-          <input
-            type="datetime-local"
-            name="lost_time"
-            value={form.lost_time}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Contact</label>
-          <input
-            name="contact"
-            value={form.contact}
-            onChange={handleChange}
-            placeholder="+91XXXXXXXXXX"
-            required
-          />
-        </div>
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Submitting..." : "Report Lost Item"}
-        </button>
-      </form>
-
-      {message && <p>{message}</p>}
-    </div>
+      </div>
+    </>
   );
 }
 
