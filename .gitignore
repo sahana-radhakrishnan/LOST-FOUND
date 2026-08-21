@@ -17,3 +17,7 @@ venv/
 # OS files
 .DS_Store
 Thumbs.db
+yolo/dataset/
+yolo/models/
+yolo/results/
+yolov8n.pt
