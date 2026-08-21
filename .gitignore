@@ -1,19 +1,49 @@
-# Environment files
+# =========================
+# Environment / Secrets
+# =========================
 .env
+.env.*
+!.env.example
 backend/.env
 
-# Python cache
+# =========================
+# Python
+# =========================
 __pycache__/
+**/__pycache__/
 *.py[cod]
-
-# Virtual environments
-venv/
+*.pyo
 .venv/
+venv/
+env/
 
-# IDE files
+# =========================
+# Node / React
+# =========================
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# =========================
+# IDE
+# =========================
 .vscode/
 .idea/
 
-# OS files
+# =========================
+# OS
+# =========================
 .DS_Store
 Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# YOLO generated files
+# =========================
+yolo/runs/
+yolo/results/
