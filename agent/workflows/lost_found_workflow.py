@@ -2,7 +2,7 @@ from agent.tools.match_item import (
     create_match,
     match_item,
 )
-
+from agent.tools.send_telegram import send_telegram
 from agent.tools.search_found_items import (
     search_found_items,
 )
@@ -290,6 +290,14 @@ class InvestigationWorkflow:
                 message=message,
                 status="PENDING",
             )
+            telegram_message = (
+                f"🔔 Lost & Found Alert\n"
+                f"{lost_item.get('item_name')} may have been found "
+                f"near {detection.get('location', 'unknown location')}.\n"
+                f"Match score: {score:.2f}"
+            )
+
+            send_telegram(telegram_message)
 
         return {
             "status": decision,
