@@ -8,7 +8,7 @@ from agent.config import (
 )
 
 def text_similarity(first: str, second: str) -> float:
-    """Calculate basic token-overlap similarity."""
+    """Calculate similarity between a lost-item name and YOLO object class."""
 
     first_tokens = set(first.lower().split())
     second_tokens = set(second.lower().split())
@@ -16,6 +16,17 @@ def text_similarity(first: str, second: str) -> float:
     if not first_tokens or not second_tokens:
         return 0.0
 
+    # Exact match
+    if first.lower().strip() == second.lower().strip():
+        return 1.0
+
+    # If the YOLO class is contained in the lost item name,
+    # treat it as a strong category match.
+    # Example: "Blue Backpack" -> "backpack"
+    if second.lower().strip() in first.lower().strip():
+        return 1.0
+
+    # Normal token overlap for other cases
     intersection = first_tokens & second_tokens
     union = first_tokens | second_tokens
 
@@ -180,5 +191,3 @@ def create_match(
     response.raise_for_status()
 
     return response.json()
-
-  

@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.detection import DetectionResponse
+
 
 class MatchCreate(BaseModel):
     lost_item_id: int = Field(..., gt=0)
@@ -20,5 +22,6 @@ class MatchResponse(BaseModel):
     reason: str
     status: str
     created_at: datetime
+    detection: DetectionResponse | None = None
 
     model_config = ConfigDict(from_attributes=True)

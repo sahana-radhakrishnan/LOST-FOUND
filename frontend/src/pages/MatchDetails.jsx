@@ -1,8 +1,74 @@
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { getMediaUrl } from "../services/api";
+import { getMatch } from "../services/api";
+
+function MatchedDetectionImage({ detection }) {
+  const [imageSize, setImageSize] = useState(null);
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = getMediaUrl(
+    detection?.image_url || detection?.image_path,
+  );
+  const bbox = detection?.bbox;
+
+  const handleLoad = (event) => {
+    setImageSize({
+      width: event.currentTarget.naturalWidth,
+      height: event.currentTarget.naturalHeight,
+    });
+  };
+
+  if (!imageUrl || imageError) {
+    return <div className="matched-image-placeholder">Image unavailable</div>;
+  }
+
+  const boxStyle = imageSize && bbox
+    ? {
+        left: `${(bbox.x1 / imageSize.width) * 100}%`,
+        top: `${(bbox.y1 / imageSize.height) * 100}%`,
+        width: `${((bbox.x2 - bbox.x1) / imageSize.width) * 100}%`,
+        height: `${((bbox.y2 - bbox.y1) / imageSize.height) * 100}%`,
+      }
+    : null;
+
+  return (
+    <div className="matched-image-frame">
+      <img
+        className="matched-image"
+        src={imageUrl}
+        alt={`Detected ${detection?.object || "matched item"}`}
+        onLoad={handleLoad}
+        onError={() => setImageError(true)}
+      />
+      {boxStyle && (
+        <div className="matched-bbox" style={boxStyle}>
+          {detection.object} ({(Number(detection.confidence) * 100).toFixed(1)}%)
+        </div>
+      )}
+    </div>
+  );
+}
 
 function MatchDetails() {
   const location = useLocation();
-  const match = location.state?.match;
+  const { id } = useParams();
+  const [loadedMatch, setLoadedMatch] = useState(null);
+  const [loadError, setLoadError] = useState(false);
+  const match = location.state?.match || loadedMatch;
+
+  useEffect(() => {
+    if (location.state?.match || !id) {
+      return undefined;
+    }
+
+    getMatch(id)
+      .then(setLoadedMatch)
+      .catch(() => setLoadError(true));
+  }, [id, location.state?.match]);
+
+  if (!match && !loadError) {
+    return <div className="card empty-state">Loading match...</div>;
+  }
 
   if (!match) {
     return (
@@ -41,7 +107,7 @@ function MatchDetails() {
     match.decision || "POSSIBLE_MATCH";
 
   const decisionClass =
-    decision === "MATCH_FOUND"
+    decision === "MATCH" || decision === "MATCH_FOUND"
       ? "badge-success"
       : decision === "POSSIBLE_MATCH"
         ? "badge-warning"
@@ -53,7 +119,7 @@ function MatchDetails() {
         <div className="breadcrumb">
           <Link to="/matches">Possible Matches</Link>
           <span>/</span>
-          <span>Match #{match.match_id}</span>
+          <span>Match #{match.id}</span>
         </div>
 
         <h1>Match Investigation</h1>
@@ -65,6 +131,17 @@ function MatchDetails() {
       </div>
 
       <div className="match-detail-grid">
+        <div className="card match-image-card">
+          <MatchedDetectionImage detection={match.detection} />
+
+          <div className="image-caption">
+            <strong>{match.detection?.object || "Matched detection"}</strong>
+            <span>Detection #{match.detection_id}</span>
+            <span>{match.detection?.location || "Location unavailable"}</span>
+            <span>{match.detection?.timestamp || "Time unavailable"}</span>
+          </div>
+        </div>
+
         <div className="card match-result-card">
           <div className="result-icon">⌕</div>
 

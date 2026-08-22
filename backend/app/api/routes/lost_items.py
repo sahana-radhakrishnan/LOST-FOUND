@@ -1,5 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import sys
+from pathlib import Path
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.database.session import get_db
 from app.schemas.lost_item import LostItemCreate, LostItemResponse
@@ -15,6 +21,31 @@ router = APIRouter(
 )
 
 
+def run_investigation(lost_item_id: int):
+    """
+    Run the investigation agent automatically after a lost item
+    has been successfully created.
+    """
+
+    try:
+        from agent.agent import LostFoundAgent
+
+        agent = LostFoundAgent()
+        result = agent.investigate(lost_item_id)
+
+        print(
+            f"[AGENT] Investigation completed for "
+            f"lost item {lost_item_id}: "
+            f"{result.get('status')}"
+        )
+
+    except Exception as exc:
+        print(
+            f"[AGENT] Investigation failed for "
+            f"lost item {lost_item_id}: {exc}"
+        )
+
+
 @router.post(
     "",
     response_model=LostItemResponse,
@@ -22,12 +53,29 @@ router = APIRouter(
 )
 def create_lost_item_endpoint(
     data: LostItemCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
+    """
+    User submits a lost-item report.
+
+    The backend stores it and automatically starts
+    the investigation agent in the background.
+    """
+
     try:
-        return create_lost_item(db, data)
+        lost_item = create_lost_item(db, data)
+
+        background_tasks.add_task(
+            run_investigation,
+            lost_item.id,
+        )
+
+        return lost_item
+
     except Exception:
         db.rollback()
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create lost item.",
@@ -43,6 +91,7 @@ def list_lost_items(
 ):
     try:
         return get_lost_items(db)
+
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

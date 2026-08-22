@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, Float, ForeignKey, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
+from app.models.detection import Detection
 
 
 class Match(Base):
@@ -24,6 +25,11 @@ class Match(Base):
         ForeignKey("detections.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
+    )
+
+    detection: Mapped["Detection"] = relationship(
+        "Detection",
+        lazy="joined",
     )
 
     match_score: Mapped[float] = mapped_column(

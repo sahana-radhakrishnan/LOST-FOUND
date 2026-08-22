@@ -1,6 +1,15 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
+
+from app.services.media_service import image_url
+
+
+class BoundingBox(BaseModel):
+    x1: float
+    y1: float
+    x2: float
+    y2: float
 
 
 class DetectionCreate(BaseModel):
@@ -10,6 +19,7 @@ class DetectionCreate(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     timestamp: datetime
     image_path: str = Field(..., min_length=1, max_length=500)
+    bbox: BoundingBox | None = None
 
 
 class DetectionResponse(BaseModel):
@@ -20,6 +30,12 @@ class DetectionResponse(BaseModel):
     confidence: float
     timestamp: datetime
     image_path: str
+    bbox: BoundingBox | None = None
     created_at: datetime
+
+    @computed_field
+    @property
+    def image_url(self) -> str | None:
+        return image_url(self.image_path)
 
     model_config = ConfigDict(from_attributes=True)

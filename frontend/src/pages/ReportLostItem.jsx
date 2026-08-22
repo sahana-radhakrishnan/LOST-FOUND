@@ -29,12 +29,26 @@ function ReportLostItem() {
     setMessage("");
 
     try {
-      await createLostItem({
+      if (!form.lost_time) {
+        throw new Error("Please select the lost time.");
+      }
+
+      const lostTime = new Date(form.lost_time);
+
+      if (Number.isNaN(lostTime.getTime())) {
+        throw new Error("Invalid lost time.");
+      }
+
+      const result = await createLostItem({
         ...form,
-        lost_time: new Date(form.lost_time).toISOString(),
+        lost_time: lostTime.toISOString(),
       });
 
-      setMessage("Lost item reported successfully.");
+      console.log("Lost item created:", result);
+
+      setMessage(
+        `Lost item reported successfully. Investigation started for item #${result.id}.`,
+      );
 
       setForm({
         item_name: "",
@@ -44,10 +58,28 @@ function ReportLostItem() {
         contact: "",
       });
     } catch (error) {
-      console.error("Failed to report lost item:", error);
-      setMessage(
-        "Backend is currently unavailable. Your form is ready to submit once the API is running.",
-      );
+      console.error("Lost item submission failed:", error);
+
+      if (error.response) {
+        console.error("Backend status:", error.response.status);
+        console.error("Backend response:", error.response.data);
+
+        const detail = error.response.data?.detail;
+
+        setMessage(
+          detail
+            ? `Submission failed: ${detail}`
+            : `Submission failed with HTTP ${error.response.status}.`,
+        );
+      } else if (error.request) {
+        console.error("No response received from backend:", error.request);
+
+        setMessage(
+          "Could not connect to the backend at http://127.0.0.1:8001.",
+        );
+      } else {
+        setMessage(error.message || "Failed to submit the report.");
+      }
     } finally {
       setLoading(false);
     }
@@ -168,9 +200,10 @@ function ReportLostItem() {
           <strong>What happens next?</strong>
 
           <p>
-            The investigation agent will search reported lost
-            items and detected objects, compare their attributes,
-            and identify possible matches.
+            The investigation agent will automatically search
+            detected objects, compare them with this report,
+            create a match when appropriate, and generate an
+            alert for a strong match.
           </p>
         </div>
       </div>

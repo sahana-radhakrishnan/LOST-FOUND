@@ -65,7 +65,7 @@ function DetectionFeed() {
             return (
               <div
                 className="item-card detection-card"
-                key={detection.detection_id}
+                key={detection.id}
               >
                 <div className="detection-card-top">
                   <div className="detection-object-icon">
@@ -78,7 +78,7 @@ function DetectionFeed() {
                 </div>
 
                 <h3>
-                  {detection.object_name ||
+                  {detection.object ||
                     "Unknown Object"}
                 </h3>
 
@@ -95,7 +95,7 @@ function DetectionFeed() {
 
                   <div>
                     <strong>Time:</strong>{" "}
-                    {detection.detected_at || "Unknown"}
+                    {detection.timestamp || "Unknown"}
                   </div>
                 </div>
 

@@ -13,6 +13,7 @@ def create_detection(db: Session, data: DetectionCreate) -> Detection:
         confidence=data.confidence,
         timestamp=data.timestamp,
         image_path=data.image_path,
+        bbox=data.bbox.model_dump() if data.bbox else None,
     )
 
     db.add(detection)

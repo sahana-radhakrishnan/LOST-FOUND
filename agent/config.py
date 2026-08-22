@@ -6,7 +6,7 @@ load_dotenv()
 
 BACKEND_API_URL = os.getenv(
     "BACKEND_API_URL",
-    "http://localhost:8000",
+    "http://127.0.0.1:8001",
 ).rstrip("/")
 
 OLLAMA_BASE_URL = os.getenv(

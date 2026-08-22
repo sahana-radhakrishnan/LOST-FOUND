@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getMatches } from "../services/api";
+import { getMatches, getMediaUrl } from "../services/api";
 
 function PossibleMatches() {
   const [matches, setMatches] = useState([]);
@@ -26,7 +26,7 @@ function PossibleMatches() {
   }, []);
 
   const getDecisionClass = (decision) => {
-    if (decision === "MATCH_FOUND") {
+    if (decision === "MATCH" || decision === "MATCH_FOUND") {
       return "badge-success";
     }
 
@@ -71,15 +71,25 @@ function PossibleMatches() {
             return (
               <div
                 className="match-card"
-                key={match.match_id}
+                key={match.id}
               >
+                {(match.detection?.image_url || match.detection?.image_path) && (
+                  <img
+                    className="match-thumbnail"
+                    src={getMediaUrl(
+                      match.detection.image_url || match.detection.image_path,
+                    )}
+                    alt={`Detected ${match.detection.object || "matched item"}`}
+                  />
+                )}
+
                 <div className="match-main">
                   <div className="match-icon">⌕</div>
 
                   <div className="match-information">
                     <div className="match-title-row">
                       <h3>
-                        Match #{match.match_id}
+                        Match #{match.id}
                       </h3>
 
                       <span
@@ -112,6 +122,18 @@ function PossibleMatches() {
                         </strong>
                       </span>
                     </div>
+
+                    <div className="matched-detection-summary">
+                      <strong>Matched Detection</strong>
+                      <span>{match.detection?.object || "Object unavailable"}</span>
+                      <span>
+                        {match.detection
+                          ? `${(Number(match.detection.confidence) * 100).toFixed(1)}% confidence`
+                          : "Confidence unavailable"}
+                      </span>
+                      <span>{match.detection?.location || "Location unavailable"}</span>
+                      <span>{match.detection?.timestamp || "Time unavailable"}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -135,7 +157,7 @@ function PossibleMatches() {
 
                   <Link
                     className="secondary-button"
-                    to={`/matches/${match.match_id}`}
+                    to={`/matches/${match.id}`}
                     state={{ match }}
                   >
                     View Details

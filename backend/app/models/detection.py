@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, String
+from sqlalchemy import DateTime, Float, JSON, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.session import Base
@@ -42,6 +42,11 @@ class Detection(Base):
     image_path: Mapped[str] = mapped_column(
         String(500),
         nullable=False,
+    )
+
+    bbox: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(

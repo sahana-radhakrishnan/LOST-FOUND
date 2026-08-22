@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+from sqlalchemy import text
 
 from app import models  # noqa: F401
 from app.api.routes import (
@@ -14,6 +17,13 @@ from app.database.session import Base, engine
 
 # Create database tables.
 Base.metadata.create_all(bind=engine)
+
+with engine.begin() as connection:
+
+    try:
+        connection.execute(text("ALTER TABLE detections ADD COLUMN bbox JSON NULL"))
+    except Exception:
+        pass
 
 
 app = FastAPI(
@@ -68,3 +78,7 @@ app.include_router(
     alerts_router,
     prefix="/api",
 )
+
+YOLO_RESULTS_DIR = Path(__file__).resolve().parents[2] / "yolo" / "results"
+YOLO_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/media", StaticFiles(directory=YOLO_RESULTS_DIR), name="media")
