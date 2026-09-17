@@ -1,0 +1,56 @@
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+backend/.env
+
+# =========================
+# Python
+# =========================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# =========================
+# Node / React
+# =========================
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+HEAD
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# YOLO generated files
+# =========================
+yolo/runs/
+yolo/results/
+
+yolo/dataset/
+yolo/models/
+yolo/results/
+yolov8n.pt
+origin/feature/backend
